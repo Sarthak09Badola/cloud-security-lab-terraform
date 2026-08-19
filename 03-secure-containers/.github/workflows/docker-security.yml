@@ -1,0 +1,26 @@
+name: 'Container Security Gatekeeper'
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  trivy_scan:
+    name: 'Build and Scan Container'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+
+      - name: Build Docker Image
+        run: docker build -t secure-app:latest .
+
+      - name: Run Trivy Security Gatekeeper
+        run: trivy image --severity CRITICAL --exit-code 1 secure-app:latest
